@@ -20,20 +20,22 @@
         <div class="searchBoxForm">
             @Html.TextBoxFor(m => m.SearchText, new { @class = "searchBox" }) <input class="searchBoxSubmit" type="submit" value="" />
         </div>
+    }
 
-        @if (Model != null)
+    @if (Model != null)
+    {
+        // Show the result count.
+        <p class="sampleText">
+            @Html.DisplayFor(m => m.ResultList.Count) Results
+        </p>
+
+        @for (int i = 0; i < Model.ResultList.Results.Count; i++)
         {
-            // Show the result count.
-            <p class="sampleText">
-                @Html.DisplayFor(m => m.ResultList.Count) Results
-            </p>
-
-            @for (int i = 0; i < Model.ResultList.Results.Count; i++)
-             {
-                 // Display the hotel name and description.
-                 @Html.TextAreaFor(m => Model.ResultList.Results[i].Document.HotelName, new { @class = "box1"})
-                 @Html.TextArea($"desc{i}", Model.ResultList.Results[i].Document.Description, new { @class = "box2"})
-             }
+            // Display the hotel name and description.
+            @Html.TextAreaFor(m => Model.ResultList.Results[i].Document.HotelName, new { @class = "box1" })
+            @Html.TextArea($"desc{i}", Model.ResultList.Results[i].Document.Description, new { @class = "box2" })
         }
     }
+
+    @await Html.PartialAsync("PagingOptions", Model)
 </body>

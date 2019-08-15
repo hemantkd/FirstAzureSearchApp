@@ -1,0 +1,77 @@
+﻿@model SearchData
+
+@if (Model?.PageCount > 1)
+{
+    <table>
+        <tr>
+            <td>
+                @if (Model.CurrentPage > 0)
+                {
+                    <p class="pageButton">
+                        @Html.ActionLink("|<", "Page", "Home", new { paging = "0" }, null)
+                    </p>
+                }
+                else
+                {
+                    <p class="pageButtonDisabled">|&lt;</p>
+                }
+            </td>
+
+            <td>
+                @if (Model.CurrentPage > 0)
+                {
+                    <p class="pageButton">
+                        @Html.ActionLink("<", "Page", "Home", new { paging = "prev" }, null)
+                    </p>
+                }
+                else
+                {
+                    <p class="pageButtonDisabled">&lt;</p>
+                }
+            </td>
+
+            @for (int pn = Model.LeftMostPage; pn < Model.LeftMostPage + Model.PageRange; pn++)
+            {
+                <td>
+                    @if (Model.CurrentPage == pn)
+                    {
+                        // Conver displayed page numbers to 1-based and not 0-based.
+                        <p class="pageSelected">@(pn + 1)</p>
+                    }
+                    else
+                    {
+                        <p class="pageButton">
+                            @Html.ActionLink((pn + 1).ToString(), "Page", "Home", new { paging = pn }, null)
+                        </p>
+                    }
+                </td>
+            }
+            
+            <td>
+                @if (Model.CurrentPage < Model.PageCount - 1)
+                {
+                    <p class="pageButton">
+                        @Html.ActionLink(">", "Page", "Home", new { paging = "next" }, null)
+                    </p>
+                }
+                else
+                {
+                    <p class="pageButtonDisabled">&gt;</p>
+                }
+            </td>
+            
+            <td>
+                @if(Model.CurrentPage < Model.PageCount - 1)
+                {
+                    <p class="pageButton">
+                        @Html.ActionLink(">|", "Page", "Home", new { paging = Model.PageCount -1 }, null)
+                    </p>
+                }
+                else
+                {
+                    <p class="pageButtonDisabled">&gt;|</p>
+                }
+            </td>
+        </tr>
+    </table>
+}
