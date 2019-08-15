@@ -28,11 +28,13 @@ namespace FirstAzureSearchApp.Controllers
         {
             try
             {
+                // Ensure the search string is valid.
                 if (model.SearchText == null)
                 {
                     model.SearchText = string.Empty;
                 }
 
+                // Make the Azure Search call.
                 await RunQueryAsync(model);
             }
             catch
@@ -49,9 +51,12 @@ namespace FirstAzureSearchApp.Controllers
 
             var parameters = new SearchParameters
             {
+                // Enter Hotel property names into this list so only these values will be returned.
+                // If Select is empty, all values will be returned, which can be inefficient.
                 Select = new[] {"HotelName", "Description"}
             };
 
+            // For efficiency, the search call should be asynchronous, so use SearchAsync rather than Search
             model.ResultList = await _indexClient.Documents.SearchAsync<Hotel>(model.SearchText, parameters);
 
             return View("Index", model);
@@ -59,12 +64,15 @@ namespace FirstAzureSearchApp.Controllers
 
         private void InitSearch()
         {
+            // Create a configuration using the appsettings file.
             _builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
             _configuration = _builder.Build();
 
+            // Pull the values from the appsettings.json file.
             string searchServiceName = _configuration["SearchServiceName"];
             string queryApiKey = _configuration["SearchServiceQueryApiKey"];
 
+            // Create a service and index client.
             _serviceClient = new SearchServiceClient(searchServiceName, new SearchCredentials(queryApiKey));
             _indexClient = _serviceClient.Indexes.GetClient("hotels");
         }
