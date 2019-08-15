@@ -1,0 +1,36 @@
+﻿@model FirstAzureSearchApp.Models.SearchData
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/hotels.css" />
+</head>
+
+<body>
+    <h1 class="sampleTitle">
+        <img src="~/images/azure-logo.png" width="80" />
+        Hotels Search
+    </h1>
+
+    @using (Html.BeginForm("Index", "Home", FormMethod.Post))
+    {
+        <div class="searchBoxForm">
+            @Html.TextBoxFor(m => m.SearchText, new { @class = "searchBox" }) <input class="searchBoxSubmit" type="submit" value="" />
+        </div>
+
+        @if (Model != null)
+        {
+            <p class="sampleText">
+                @Html.DisplayFor(m => m.ResultList.Count) Results
+            </p>
+
+            @for (int i = 0; i < Model.ResultList.Results.Count; i++)
+             {
+                 @Html.TextAreaFor(m => Model.ResultList.Results[i].Document.HotelName, new { @class = "box1"})
+                 @Html.TextArea($"desc{i}", Model.ResultList.Results[i].Document.Description, new { @class = "box2"})
+             }
+        }
+    }
+</body>
