@@ -132,6 +132,96 @@ namespace FirstAzureSearchApp.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+        public async Task<ActionResult> AutocompleteAndSuggest(string term)
+        {
+            InitSearch();
+
+            // Setup the type-ahead search parameters.
+            var ap = new AutocompleteParameters
+            {
+                AutocompleteMode = AutocompleteMode.OneTermWithContext,
+                Top = 1
+            };
+            AutocompleteResult autocompleteResult = await _indexClient.Documents.AutocompleteAsync(term, "sg", ap);
+
+            // Setup the suggest search parameters.
+            var sp = new SuggestParameters
+            {
+                Top = 8
+            };
+
+            DocumentSuggestResult<Hotel> suggestResult =
+                await _indexClient.Documents.SuggestAsync<Hotel>(term, "sg", sp);
+
+            var results = new List<string>();
+
+            if (autocompleteResult.Results.Count > 0)
+            {
+                // Add the top result for type-ahead
+                results.Add(autocompleteResult.Results[0].Text);
+            }
+            else
+            {
+                // There were no type-ahead suggestions, so add an empty string.
+                results.Add(string.Empty);
+            }
+
+            foreach (var result in suggestResult.Results)
+            {
+                results.Add(result.Text);
+            }
+
+            return new JsonResult(results);
+        }
+
+        public async Task<ActionResult> AutoComplete(string term)
+        {
+            InitSearch();
+
+            // Setup the autocomplete parameters.
+            var ap = new AutocompleteParameters
+            {
+                AutocompleteMode = AutocompleteMode.OneTermWithContext,
+                Top = 6
+            };
+
+            AutocompleteResult autocompleteResult = await _indexClient.Documents.AutocompleteAsync(term, "sg", ap);
+
+            // Convert the results to a list that can be displayed in the client.
+            List<string> autocomplete = autocompleteResult.Results.Select(x => x.Text).ToList();
+
+            // Return the list.
+            return new JsonResult(autocomplete);
+        }
+
+        public async Task<ActionResult> Suggest(bool highlights, bool fuzzy, string term)
+        {
+            InitSearch();
+
+            // Setup the suggest parameters.
+            var parameters = new SuggestParameters
+            {
+                UseFuzzyMatching = fuzzy,
+                Top = 8
+            };
+
+            if (highlights)
+            {
+                parameters.HighlightPreTag = "<b>";
+                parameters.HighlightPostTag = "</b>";
+            }
+
+            // Only one suggester can be specified per index. The name of the suggester is set when the suggester is specified by other API calls.
+            // The suggester for the hotel database is called "sg", and simply searches the hotel name.
+            DocumentSuggestResult<Hotel> suggestResult =
+                await _indexClient.Documents.SuggestAsync<Hotel>(term, "sg", parameters);
+
+            // Convert the suggest query results to a list that can be displayed in the client.
+            List<string> suggestions = suggestResult.Results.Select(x => x.Text).ToList();
+
+            return new JsonResult(suggestions);
+        }
+
         public async Task<IActionResult> Page(SearchData model)
         {
             try
